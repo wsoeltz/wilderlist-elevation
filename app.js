@@ -1,24 +1,27 @@
 require('dotenv').config();
 
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
 
-var app = express();
+const app = express();
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   try {
+    const fileName = process.env.TILE_PATH + 'test.json';
+    let previous = undefined;
+    try {
+      const prevJSON = fs.readFileSync(fileName);
+      previous = JSON.parse(prevJSON);
+    } catch (error) {
+      console.error(error)
+    }
     const lat = req.query && req.query.lat ? req.query.lat : undefined;
     const lng = req.query && req.query.lng ? req.query.lng : undefined;
-    res.json({lat, lng});
+    fs.writeFileSync(fileName, JSON.stringify({lat, lng}));
+    res.json({lat, lng, previous});
   } catch (err) {
     res.status(500);
     res.send(err);
