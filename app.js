@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
         console.log('getElevation failed: ' + err.message);
       } else {
         elevation = units === 'feet' ? elevation * 3.28084 : elevation;
-        res.json({lat, lng, elevation, ci: true});
+        res.json({lat, lng, elevation});
       }
     });
   } catch (err) {
