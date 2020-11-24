@@ -13,9 +13,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   try {
-    const lat = req.query && req.query.lat ? req.query.lat : undefined;
-    const lng = req.query && req.query.lng ? req.query.lng : undefined;
+    const lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
+    const lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
     const units = req.query && req.query.units && req.query.units === 'feet' ? 'feet' : 'meters';
+    const format = req.query && req.query.format && req.query.format === 'geojson' ? 'geojson' : 'default';
 
     tileset.getElevation([lat, lng], function(err, elevation) {
       if (err) {
@@ -24,7 +25,18 @@ app.get('/', (req, res) => {
         console.log('getElevation failed: ' + err.message);
       } else {
         elevation = units === 'feet' ? elevation * 3.28084 : elevation;
-        res.json({lat, lng, elevation});
+        if (format === 'geojson') {
+          res.json({
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [lng, lat, elevation]
+            },
+            "properties": {}
+          });
+        } else {
+          res.json({lat, lng, elevation});
+        }
       }
     });
   } catch (err) {
