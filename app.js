@@ -15,13 +15,17 @@ app.get('/', (req, res) => {
   try {
     const lat = req.query && req.query.lat ? req.query.lat : undefined;
     const lng = req.query && req.query.lng ? req.query.lng : undefined;
+    const units = req.query && req.query.units && req.query.units === 'feet' ? 'feet' : 'meters';
 
     tileset.getElevation([lat, lng], function(err, elevation) {
-        if (err) {
-            console.log('getElevation failed: ' + err.message);
-        } else {
-            res.json({lat, lng, elevation});
-        }
+      if (err) {
+        res.status(500);
+        res.json({error: err.message});
+        console.log('getElevation failed: ' + err.message);
+      } else {
+        elevation = units === 'feet' ? elevation * 3.28084 : elevation;
+        res.json({lat, lng, elevation, ci: true});
+      }
     });
   } catch (err) {
     res.status(500);
