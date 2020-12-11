@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
               "type": "Point",
               "coordinates": [lng, lat, elevation]
             },
-            "properties": {}
+            "properties": {"deployed_from": "codepipeline"}
           });
         } else {
           res.json({lat, lng, elevation});
