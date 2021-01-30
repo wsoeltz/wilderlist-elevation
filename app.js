@@ -1,7 +1,9 @@
 require('dotenv').config();
 
 const express = require('express');
+const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 
 console.log('Attempting to connect to MongoDB');
 // Connect to database
@@ -10,13 +12,43 @@ require('./database/connect');
 const fs = require('fs');
 const {TileSet} = require('node-hgt')
 const getPointInfo = require('./api/pointInfo');
+const getLineElevation = require('./api/lineElevation');
 
 
 const tileset = new TileSet(process.env.TILE_PATH);
 
 const app = express();
 
+// create application/json parser
+var jsonParser = bodyParser.json()
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+if (process.env.NODE_ENV === 'development') {
+  // Allow all cors requests on development
+  app.use(cors());
+} else {
+  var whitelist = [
+    'https://wilderlist.app',
+    'http://wilderlist.app',
+    'https://wwww.wilderlist.app',
+    'http://wwww.wilderlist.app',
+    'https://wilderlist-prod.herokuapp.com/',
+    'http://wilderlist-prod.herokuapp.com/',
+    'https://wilderlist-dev.herokuapp.com/',
+    'http://wilderlist-dev.herokuapp.com/',
+  ]
+  var corsOptions = {
+    origin: function (origin, callback) {
+      if (whitelist.indexOf(origin) !== -1) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    }
+  }
+  app.use(cors(corsOptions));
+}
 
 app.get('/', (req, res) => {
   try {
@@ -53,11 +85,22 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/point-info', async (req, res) => {
+app.get('/api/point-info', async (req, res) => {
   try {
     const response = await getPointInfo(req);
     res.json(response);
   } catch (err) {
+    res.status(500);
+    res.send(err);
+  }
+});
+
+app.post('/api/line-elevation', jsonParser, async (req, res) => {
+  try {
+    const response = await getLineElevation(req);
+    res.json(response);
+  } catch (err) {
+    console.log(err)
     res.status(500);
     res.send(err);
   }
