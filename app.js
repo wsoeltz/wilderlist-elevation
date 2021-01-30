@@ -2,8 +2,15 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
+
+console.log('Attempting to connect to MongoDB');
+// Connect to database
+require('./database/connect');
+
 const fs = require('fs');
 const {TileSet} = require('node-hgt')
+const getPointInfo = require('./api/pointInfo');
+
 
 const tileset = new TileSet(process.env.TILE_PATH);
 
@@ -39,6 +46,17 @@ app.get('/', (req, res) => {
         }
       }
     });
+  } catch (err) {
+    res.status(500);
+    res.send(err);
+  }
+});
+
+
+app.get('/point-info', async (req, res) => {
+  try {
+    const response = await getPointInfo(req);
+    res.json(response);
   } catch (err) {
     res.status(500);
     res.send(err);
