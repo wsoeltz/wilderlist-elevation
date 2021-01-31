@@ -37,10 +37,12 @@ if (process.env.NODE_ENV === 'development') {
     'http://wilderlist-prod.herokuapp.com/',
     'https://wilderlist-dev.herokuapp.com/',
     'http://wilderlist-dev.herokuapp.com/',
+    'http://localhost:3000/',
+    'http://localhost:5050/',
   ]
   var corsOptions = {
     origin: function (origin, callback) {
-      if (whitelist.indexOf(origin) !== -1) {
+      if (whitelist.indexOf(origin) !== -1 || !origin) {
         callback(null, true)
       } else {
         callback(new Error('Not allowed by CORS'))
