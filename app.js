@@ -14,6 +14,7 @@ const {TileSet} = require('node-hgt')
 const getPointInfo = require('./api/pointInfo');
 const getLineElevation = require('./api/lineElevation');
 const getDirectionsPointToPoint = require('./api/directionsPointToPoint');
+const directionsToParking = require('./api/directionsToParking');
 
 
 const tileset = new TileSet(process.env.TILE_PATH);
@@ -113,6 +114,17 @@ app.post('/api/line-elevation', jsonParser, async (req, res) => {
 app.get('/api/directions-to-point', async (req, res) => {
   try {
     const response = await getDirectionsPointToPoint(req);
+    res.json(response);
+  } catch (err) {
+    console.log(err)
+    res.status(500);
+    res.send(err);
+  }
+});
+
+app.get('/api/directions-to-parking', async (req, res) => {
+  try {
+    const response = await directionsToParking(req);
     res.json(response);
   } catch (err) {
     console.log(err)

@@ -126,10 +126,21 @@ const PeakListSchema = new Schema({
 
 const PeakList = model('list', PeakListSchema);
 
+const ParkingSchema = new Schema({
+  name: { type: String },
+  osmId: { type: String },
+  type: { type: String },
+  location: [{type: Number}],
+})
+
+ParkingSchema.index({ location: '2dsphere' });
+
+const Parking = model('parking', ParkingSchema, 'parking');
 
 module.exports = {
   Mountain,
   State,
   Trail,
   PeakList,
+  Parking,
 }

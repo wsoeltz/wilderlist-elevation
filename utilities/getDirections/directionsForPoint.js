@@ -88,7 +88,7 @@ const getDrivingDistance = async (lat1, lng1, lat2, lng2) => {
         res.data.routes[0].distance && res.data.routes[0].duration) {
       const {distance, duration, geometry: {coordinates}} = res.data.routes[0];
       // slight adjustment of duration to account for most people speeding
-      const adjustedDuration = duration * 0.84;
+      const adjustedDuration = duration * 0.94;
       const hours = Math.floor(adjustedDuration / 60 / 60);
       const minutes = Math.round(((adjustedDuration / 60 / 60) - hours) * 60);
       const miles = Math.round(distance * 0.00062137);

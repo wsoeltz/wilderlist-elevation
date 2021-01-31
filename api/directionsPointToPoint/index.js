@@ -1,6 +1,5 @@
 const {getDrivingDistance} = require('../../utilities/getDirections/directionsForPoint');
 
-
 // interface Input {
 //   lat1: number;
 //   lng1: number;
