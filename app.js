@@ -28,28 +28,29 @@ if (process.env.NODE_ENV === 'development') {
   // Allow all cors requests on development
   app.use(cors());
 } else {
-  var whitelist = [
-    'https://wilderlist.app',
-    'http://wilderlist.app',
-    'https://wwww.wilderlist.app',
-    'http://wwww.wilderlist.app',
-    'https://wilderlist-prod.herokuapp.com/',
-    'http://wilderlist-prod.herokuapp.com/',
-    'https://wilderlist-dev.herokuapp.com/',
-    'http://wilderlist-dev.herokuapp.com/',
-    'http://localhost:3000/',
-    'http://localhost:5050/',
-  ]
-  var corsOptions = {
-    origin: function (origin, callback) {
-      if (whitelist.indexOf(origin) !== -1 || !origin) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
-    }
-  }
-  app.use(cors(corsOptions));
+  // var whitelist = [
+  //   'https://wilderlist.app',
+  //   'http://wilderlist.app',
+  //   'https://wwww.wilderlist.app',
+  //   'http://wwww.wilderlist.app',
+  //   'https://wilderlist-prod.herokuapp.com/',
+  //   'http://wilderlist-prod.herokuapp.com/',
+  //   'https://wilderlist-dev.herokuapp.com/',
+  //   'http://wilderlist-dev.herokuapp.com/',
+  //   'http://localhost:3000/',
+  //   'http://localhost:5050/',
+  // ]
+  // var corsOptions = {
+  //   origin: function (origin, callback) {
+  //     if (whitelist.indexOf(origin) !== -1 || !origin) {
+  //       callback(null, true)
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'))
+  //     }
+  //   }
+  // }
+  // app.use(cors(corsOptions));
+  app.use(cors());
 }
 
 app.get('/', (req, res) => {
