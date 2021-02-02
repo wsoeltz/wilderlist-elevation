@@ -55,33 +55,43 @@ if (process.env.NODE_ENV === 'development') {
   app.use(cors());
 }
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const testRequest = {
+    query: {
+      lat: '40.494444',
+      lng: '-121.4175',
+      state: 'true',
+      county: 'true',
+      elevation: 'true',
+    }
+  }
   try {
-    const lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
-    const lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
-    const units = req.query && req.query.units && req.query.units === 'feet' ? 'feet' : 'meters';
-    const format = req.query && req.query.format && req.query.format === 'geojson' ? 'geojson' : 'default';
+    const response = await getPointInfo(testRequest);
+    res.json({
+      server_health: 'healhy',
+      ...response,
+    });
+  } catch (err) {
+    res.status(500);
+    res.send(err);
+  }
+});
 
-    tileset.getElevation([lat, lng], function(err, elevation) {
-      if (err) {
-        res.status(500);
-        res.json({error: err.message});
-        console.log('getElevation failed: ' + err.message);
-      } else {
-        elevation = units === 'feet' ? elevation * 3.28084 : elevation;
-        if (format === 'geojson') {
-          res.json({
-            "type": "Feature",
-            "geometry": {
-              "type": "Point",
-              "coordinates": [lng, lat, elevation]
-            },
-            "properties": {}
-          });
-        } else {
-          res.json({lat, lng, elevation});
-        }
-      }
+app.get('/health', async (req, res) => {
+  const testRequest = {
+    query: {
+      lat: '40.494444',
+      lng: '-121.4175',
+      state: 'true',
+      county: 'true',
+      elevation: 'true',
+    }
+  }
+  try {
+    const response = await getPointInfo(testRequest);
+    res.json({
+      server_health: 'healhy',
+      ...response,
     });
   } catch (err) {
     res.status(500);
