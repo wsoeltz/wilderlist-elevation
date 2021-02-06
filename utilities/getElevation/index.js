@@ -39,7 +39,9 @@ function getSlopeAngle([lng1, lat1, ele1], [lng2, lat2, ele2]) {
     point([lng2, lat2]),
     {units: 'kilometers'},
   ) * 3280.84; // convert kilometers to feet
-  return radiansToDegrees(Math.atan(elevationDiffInFeet / distanceInFeet));
+  const slope = elevationDiffInFeet && distanceInFeet
+    ? radiansToDegrees(Math.atan(elevationDiffInFeet / distanceInFeet)) : 0;
+  return slope;
 }
 
 
