@@ -15,6 +15,7 @@ const {point} = require('@turf/helpers');
 // interface Output {
 //   Array<{
 //    originName: string;
+//    originType: string;
 //    originLat: number;
 //    originLng: number;
 //    miles: number;
@@ -44,6 +45,7 @@ const getDirectionsPointToPoint = async (req) => {
         return [
           {
             originName: 'SOURCE',
+            originType: 'SOURCE',
             originLat: result.coordinates[result.coordinates.length - 1][1],
             originLng: result.coordinates[result.coordinates.length - 1][0],
             ...result,
@@ -62,8 +64,12 @@ const getDirectionsPointToPoint = async (req) => {
         const originName = parking[i] && parking[i].name && parking[i].name.length
           ? parking[i].name
           : (m.returnedName && m.returnedName.length ? m.returnedName : null);
+        const originType = parking[i] && parking[i].type && parking[i].type.length
+          ? parking[i].type.length
+          : null;
         return {
           originName,
+          originType,
           originLat: parking[i] && parking[i].location ? parking[i].location[1] : 0,
           originLng: parking[i] && parking[i].location ? parking[i].location[0] : 0,
           miles: m.miles,
