@@ -151,7 +151,7 @@ app.use(function(err, req, res, next) {
 });
 
 if (process.env.NODE_ENV === 'development') {
-  app.listen(5000, () => {
+  app.listen(5050, () => {
     // tslint:disable-next-line
     return console.log(`listening on port 5000`);
   });
