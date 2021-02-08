@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "localserver": "node ./app.js",
     "dev": "nodemon ./app.js"
   },
   "dependencies": {

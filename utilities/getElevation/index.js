@@ -59,7 +59,7 @@ const getElevationForLine = async (line, returnIncline, returnMinMax) => {
     await asyncForEach(line, async (point, i) => {
       try {
         const value = await getElevationForPoint(point[1], point[0])
-        elevationLine.push([...point, value.elevation]);
+        elevationLine.push([point[0], point[1], value.elevation]);
         if (returnIncline && isOdd(i) && elevationLine[i].length === 3 && elevationLine[i - 1].length === 3) {
           allSlopes.push(getSlopeAngle(elevationLine[i], elevationLine[i - 1]));
         }
