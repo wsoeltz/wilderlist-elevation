@@ -23,7 +23,11 @@ const tileset = new TileSet(process.env.TILE_PATH);
 const app = express();
 
 // create application/json parser
-var jsonParser = bodyParser.json()
+var jsonParser = bodyParser.json({
+  parameterLimit: 100000,
+  limit: '50mb',
+  extended: true
+})
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -116,7 +120,7 @@ app.post('/api/line-elevation', jsonParser, async (req, res) => {
     const response = await getLineElevation(req);
     res.json(response);
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(500);
     res.send(err);
   }
@@ -127,7 +131,7 @@ app.get('/api/directions-to-point', async (req, res) => {
     const response = await getDirectionsPointToPoint(req);
     res.json(response);
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(500);
     res.send(err);
   }
@@ -138,7 +142,7 @@ app.get('/api/directions-to-parking', async (req, res) => {
     const response = await directionsToParking(req);
     res.json(response);
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(500);
     res.send(err);
   }
@@ -149,7 +153,7 @@ app.get('/api/weather-at-point', async (req, res) => {
     const response = await getWeatherAtPoint(req);
     res.json(response);
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(500);
     res.send(err);
   }
@@ -160,7 +164,7 @@ app.get('/api/weather-at-valley', async (req, res) => {
     const response = await getWeatherAtValley(req);
     res.json(response);
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.status(500);
     res.send(err);
   }
