@@ -17,6 +17,7 @@ const getDirectionsPointToPoint = require('./api/directionsPointToPoint');
 const directionsToParking = require('./api/directionsToParking');
 const getWeatherAtPoint = require('./api/weather/weatherAtPoint');
 const getWeatherAtValley = require('./api/weather/weatherAtValley');
+const getLocalLinestrings = require('./api/routing/localLinestrings');
 
 const tileset = new TileSet(process.env.TILE_PATH);
 
@@ -162,6 +163,17 @@ app.get('/api/weather-at-point', async (req, res) => {
 app.get('/api/weather-at-valley', async (req, res) => {
   try {
     const response = await getWeatherAtValley(req);
+    res.json(response);
+  } catch (err) {
+    console.error(err)
+    res.status(500);
+    res.send(err);
+  }
+});
+
+app.get('/api/local-linestrings', async (req, res) => {
+  try {
+    const response = await getLocalLinestrings(req);
     res.json(response);
   } catch (err) {
     console.error(err)
