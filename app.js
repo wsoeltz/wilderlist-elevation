@@ -18,6 +18,8 @@ const directionsToParking = require('./api/directionsToParking');
 const getWeatherAtPoint = require('./api/weather/weatherAtPoint');
 const getWeatherAtValley = require('./api/weather/weatherAtValley');
 const getLocalLinestrings = require('./api/routing/localLinestrings');
+const getLocalParking = require('./api/directionsToParking/localParking');
+const getRoutesToPoint = require('./api/routing/routesToPoint');
 
 const tileset = new TileSet(process.env.TILE_PATH);
 
@@ -171,9 +173,31 @@ app.get('/api/weather-at-valley', async (req, res) => {
   }
 });
 
+app.get('/api/local-parking', async (req, res) => {
+  try {
+    const response = await getLocalParking(req);
+    res.json(response);
+  } catch (err) {
+    console.error(err)
+    res.status(500);
+    res.send(err);
+  }
+});
+
 app.get('/api/local-linestrings', async (req, res) => {
   try {
     const response = await getLocalLinestrings(req);
+    res.json(response);
+  } catch (err) {
+    console.error(err)
+    res.status(500);
+    res.send(err);
+  }
+});
+
+app.get('/api/routes-to-point', async (req, res) => {
+  try {
+    const response = await getRoutesToPoint(req);
     res.json(response);
   } catch (err) {
     console.error(err)
@@ -190,7 +214,7 @@ app.use(function(err, req, res, next) {
 });
 
 if (process.env.NODE_ENV === 'development') {
-  const port = 5000;
+  const port = 5050;
   app.listen(port, () => {
     // tslint:disable-next-line
     return console.log(`listening on port ${port}`);

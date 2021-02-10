@@ -14,6 +14,10 @@ const totalRoadObjects = 9;
 const totalTrailObjects = 1;
 const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
 
+const addDensityAndMerge = (lines) => {
+  return featureCollection(lines);
+}
+
 const getLocalLinestrings = (lat, lng) => {
 
   return new Promise((resolve, reject) => {
@@ -34,14 +38,14 @@ const getLocalLinestrings = (lat, lng) => {
           }
           returnedObjects++;
           if (returnedObjects === totalReturnedObjects) {
-            resolve(featureCollection(lines))
+            resolve(addDensityAndMerge(lines))
           }
         })
         .catch(error => {
           console.error(error);
           returnedObjects++;
           if (returnedObjects === totalReturnedObjects) {
-            resolve(featureCollection(lines))
+            resolve(addDensityAndMerge(lines))
           }
         });
       left += 0.1;
@@ -57,7 +61,7 @@ const getLocalLinestrings = (lat, lng) => {
             type : 'Point',
               coordinates : [ lng, lat ],
             },
-            $maxDistance: 1609.34 * 12, // meters in a mile * number of miles
+            $maxDistance: 1609.34 * 8, // meters in a mile * number of miles
           },
        },
     }).then(trails => {
@@ -66,14 +70,14 @@ const getLocalLinestrings = (lat, lng) => {
       }
       returnedObjects++;
       if (returnedObjects === totalReturnedObjects) {
-        resolve(featureCollection(lines))
+        resolve(addDensityAndMerge(lines))
       }
     })
     .catch(error => {
       console.error(error);
       returnedObjects++;
       if (returnedObjects === totalReturnedObjects) {
-        resolve(featureCollection(lines))
+        resolve(addDensityAndMerge(lines))
       }
     });
   });

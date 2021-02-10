@@ -1,9 +1,6 @@
 const {Parking} = require('../../database/models');
-const mongoose = require('mongoose');
-const {point, featureCollection} = require('@turf/helpers');
 const clustersDbscan = require('@turf/clusters-dbscan').default;
-const groupBy = require('lodash/groupBy');
-const sortBy = require('lodash/sortBy');
+const distance = require('@turf/distance').default;
 
 const getNearestParking = async (lat, lng) => {
   const response = await Parking.find({
@@ -17,26 +14,14 @@ const getNearestParking = async (lat, lng) => {
            $minDistance: 1600,  // 1 mile
         },
      },
-  }).limit(30);
-  const features = response.map(d => point(d.location, {data: d._doc}));
-  const clusters = clustersDbscan(featureCollection(features), 1.207008); // in km, equal to 0.75 mile
-  const groupedClusters = groupBy(clusters.features, 'properties.cluster')
+  }).limit(15);
   const out = [];
-  for (let cluster in groupedClusters) {
-    const clusterData = groupedClusters[cluster].map(f => f.properties.data);
-    const orderedClusters = sortBy(clusterData, c => {
-      if (c.name) {
-        return c.length;
-      } else {
-        if (c.type === 'intersection') { 
-          return 0;
-        } else {
-          return 1;
-        }
-      }
-    })
-    out.push(orderedClusters[orderedClusters.length - 1]);
-  }
+  response.forEach(parking => {
+    const nearbyNode = out.find(other => distance(other.location, parking.location, {units: 'miles'}) < 0.1);
+    if (!nearbyNode) {
+      out.push(parking);
+    }
+  })
   return out.slice(0, 7);
 }
 
