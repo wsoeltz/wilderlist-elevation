@@ -17,7 +17,7 @@ const getNearestParking = async (lat, lng) => {
   }).limit(15);
   const out = [];
   response.forEach(parking => {
-    const nearbyNode = out.find(other => distance(other.location, parking.location, {units: 'miles'}) < 0.1);
+    const nearbyNode = out.find(other => distance(other.location, parking.location, {units: 'miles'}) < 0.25);
     if (!nearbyNode) {
       out.push(parking);
     }
