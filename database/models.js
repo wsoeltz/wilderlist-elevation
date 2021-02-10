@@ -5,6 +5,7 @@ const MountainSchema = new Schema({
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   elevation: { type: Number, required: true },
+  prominence: { type: Number },
   state: {
     type: Schema.Types.ObjectId,
     ref: 'state',
@@ -30,6 +31,8 @@ const MountainSchema = new Schema({
   }],
   location: [{type: Number}],
   trailAccessible: {type: Boolean},
+  locationText: { type: String },
+  locationTextShort: { type: String },
 });
 
 const Mountain = model('mountain', MountainSchema);
