@@ -137,10 +137,48 @@ ParkingSchema.index({ location: '2dsphere' });
 
 const Parking = model('parking', ParkingSchema, 'parking');
 
+const CampsiteSchema = new Schema({
+  reserveamericaId: { type: String },
+  ridbId: { type: String },
+  osmId: { type: String },
+  name: { type: String },
+  location: [{type: Number}],
+  state: {
+    type: Schema.Types.ObjectId,
+    ref: 'state',
+  },
+  website: { type: String },
+  type: { type: String },
+  ownership: { type: String },
+  electricity: { type: Boolean },
+  toilets: { type: Boolean },
+  drinking_water: { type: Boolean },
+  email: { type: String },
+  reservation: { type: String },
+  showers: { type: Boolean },
+  phone: { type: String },
+  fee: { type: Boolean },
+  tents: { type: Boolean },
+  capacity: { type: Number },
+  internet_access: { type: Boolean },
+  fire: { type: Boolean },
+  maxtents: { type: Number },
+  flag: { type: String },
+  locationText: { type: String },
+  locationTextShort: { type: String },
+  elevation: { type: Number },
+});
+
+CampsiteSchema.index({ center: '2dsphere' });
+CampsiteSchema.index({ name: 'text' });
+
+const Campsite = model('campsite', CampsiteSchema);
+
 module.exports = {
   Mountain,
   State,
   Trail,
   PeakList,
   Parking,
+  Campsite,
 }

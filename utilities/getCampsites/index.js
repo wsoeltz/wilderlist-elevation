@@ -1,9 +1,9 @@
-const {Parking} = require('../../database/models');
+const {Campsite} = require('../../database/models');
 const clustersDbscan = require('@turf/clusters-dbscan').default;
 const distance = require('@turf/distance').default;
 
-const getNearestParking = async (lat, lng) => {
-  const response = await Parking.find({
+const getNearestCampsites = async (lat, lng) => {
+  const response = await Campsite.find({
     location: {
         $nearSphere: {
            $geometry: {
@@ -11,24 +11,23 @@ const getNearestParking = async (lat, lng) => {
               coordinates : [ lng, lat ],
            },
            $maxDistance: 32186, // 20 miles
-           $minDistance: 1600,  // 1 mile
         },
      },
-  }).limit(50);
+  }).limit(10);
   const out = [];
-  response.forEach(parking => {
-    const nearbyNode = out.findIndex(other => distance(other.location, parking.location, {units: 'miles'}) < 0.75);
+  response.forEach(campsite => {
+    const nearbyNode = out.findIndex(other => distance(other.location, campsite.location, {units: 'miles'}) < 0.1);
     if (nearbyNode === -1) {
-      out.push(parking);
+      out.push(campsite);
     } else {
-      const distanceThis = distance([ lng, lat ], parking.location);
+      const distanceThis = distance([ lng, lat ], campsite.location);
       const distanceOther = distance([ lng, lat ], out[nearbyNode].location);
       if (distanceThis < distanceOther) {
-        out[nearbyNode] = parking;
+        out[nearbyNode] = campsite;
       }
     }
   })
   return out;
 }
 
-module.exports = getNearestParking;
+module.exports = getNearestCampsites;
