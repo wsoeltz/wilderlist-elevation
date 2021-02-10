@@ -5,6 +5,10 @@ const {point, lineString, featureCollection} = require('@turf/helpers');
 const explode = require('@turf/explode');
 const nearestPoint = require('@turf/nearest-point').default;
 const uniqBy = require('lodash/uniqBy');
+const getPathFinder = require('../../utilities/getRoutes');
+const {getElevationForLine} = require('../../utilities/getElevation');
+const asyncForEach = require('../../utilities/asyncForEach');
+const distance = require('@turf/distance').default;
 
 const getRoutesToPoint = async (req) => {
   const lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
@@ -13,43 +17,46 @@ const getRoutesToPoint = async (req) => {
   let output = {};
 
   if (lat && lng) {
-    const geojson = await getLocalLinestrings(lat, lng);
+    const geojson = await getLocalLinestrings(lat, lng, true);
     const parking = await getNearestParking(lat, lng);
 
     if (parking && geojson) {
-      const graph = explode(geojson);
-      const endPoint = nearestPoint(point([lng, lat]), graph);
-      let pathFinder = new PathFinder(geojson, {
-        weightFn: function(a, b, props) {
-            var dx = a[0] - b[0];
-            var dy = a[1] - b[1];
-            let multiplier = 1;
-            if (props.type !== 'road' && props.type !== 'dirtroad') {
-              multiplier += 0.1;
-            }
-            if (props.name) {
-              multiplier += 0.1;
-            }
-            const weight =  Math.sqrt(dx * dx + dy * dy) * multiplier;
-            return weight;
-        },
-        edgeDataReduceFn: function (properties, props) {
-          return {
-            ...props,
-            id: props.id ? props.id : `ROAD ID ${props.name}`.toUpperCase().split(' ').join('_'),
-          };
-        }
-      });
+      const {pathFinder, nearestPointInNetwork} = getPathFinder(geojson);
+      const endPoint = nearestPointInNetwork([lng, lat]);
+      const distanceFromActualToGraphPoint = distance([ lng, lat ], endPoint, {units: 'miles'});
       const paths = [];
-      parking.forEach(p => {
-        const startPoint = nearestPoint(point(p.location), graph);
-        const path = pathFinder.findPath(startPoint, endPoint);
-        if (path) {
-          const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
-          paths.push(lineString(path.path, {trails}));
+      if (distanceFromActualToGraphPoint < 0.1) {
+        parking.forEach(p => {
+          const startPoint = nearestPointInNetwork(p.location);
+          const path = pathFinder.findPath(startPoint, endPoint);
+          if (path) {
+            const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
+            paths.push(lineString(path.path, {trails}));
+          }
+        });
+      }
+      const pathsWithElevation = [];
+      await asyncForEach(paths, async p => {
+          const elevationData = await getElevationForLine(p.geometry.coordinates, true, true);
+          const properties = {
+            ...p.properties,
+            elevation_gain: elevationData.elevationGain,
+            elevation_loss: elevationData.elevationLoss,
+            elevation_min: elevationData.minElevation,
+            elevation_max: elevationData.maxElevation,
+            avg_slope: elevationData.averageSlopeAngle,
+            max_slope: elevationData.maxSlope,
+            min_slope: elevationData.minSlope,
+          }
+          const geometry = {...p.geometry, coordinates: elevationData.elevationLine}
+          pathsWithElevation.push({
+            ...p,
+            geometry,
+            properties,
+          })
         }
-      });
-      output = featureCollection(paths);
+      );
+      output = featureCollection(pathsWithElevation);
     }
   } else {
     output = {error: 'Unable to get routes'};

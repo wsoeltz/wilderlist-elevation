@@ -14,15 +14,21 @@ const getNearestParking = async (lat, lng) => {
            $minDistance: 1600,  // 1 mile
         },
      },
-  }).limit(15);
+  }).limit(50);
   const out = [];
   response.forEach(parking => {
-    const nearbyNode = out.find(other => distance(other.location, parking.location, {units: 'miles'}) < 0.25);
-    if (!nearbyNode) {
+    const nearbyNode = out.findIndex(other => distance(other.location, parking.location, {units: 'miles'}) < 0.75);
+    if (nearbyNode === -1) {
       out.push(parking);
+    } else {
+      const distanceThis = distance([ lng, lat ], parking.location);
+      const distanceOther = distance([ lng, lat ], out[nearbyNode].location);
+      if (distanceThis < distanceOther) {
+        out[nearbyNode] = parking;
+      }
     }
   })
-  return out.slice(0, 7);
+  return out;
 }
 
 module.exports = getNearestParking;

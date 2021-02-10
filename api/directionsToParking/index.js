@@ -60,7 +60,7 @@ const getDirectionsPointToPoint = async (req) => {
     const destinations = parking.map(p => p.location);
     const matrixRespone = await getDistanceMatrix(lat1, lng1, destinations);
     if (matrixRespone) {
-      output = matrixRespone.map((m, i) => {
+      output = matrixRespone.slice(0, 7).map((m, i) => {
         const originName = parking[i] && parking[i].name && parking[i].name.length
           ? parking[i].name
           : (m.returnedName && m.returnedName.length ? m.returnedName : null);

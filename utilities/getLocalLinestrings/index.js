@@ -7,20 +7,21 @@ Return up to 9 road objects (center is for current lat/lng and then all surround
 □□□
 □▣□
 □□□
-Return 1 additional object from MongoDB containt all trails within 40 miles
+Return 1 additional object from MongoDB contains all trails within range
 **********/
 
-const totalRoadObjects = 9;
-const totalTrailObjects = 1;
-const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
 
 const addDensityAndMerge = (lines) => {
   return featureCollection(lines);
 }
 
-const getLocalLinestrings = (lat, lng) => {
+const getLocalLinestrings = (lat, lng, onlyTrails) => {
+  const totalRoadObjects = onlyTrails ? 0 : 9;
+  const totalTrailObjects = 1;
+  const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
 
   return new Promise((resolve, reject) => {
+
     let returnedObjects = 0;
     const lines = [];
 
@@ -61,7 +62,7 @@ const getLocalLinestrings = (lat, lng) => {
             type : 'Point',
               coordinates : [ lng, lat ],
             },
-            $maxDistance: 1609.34 * 8, // meters in a mile * number of miles
+            $maxDistance: 1609.34 * 10, // meters in a mile * number of miles
           },
        },
     }).then(trails => {
