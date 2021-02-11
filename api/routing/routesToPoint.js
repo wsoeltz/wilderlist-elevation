@@ -14,8 +14,21 @@ const distance = require('@turf/distance').default;
 const length = require('@turf/length').default;
 
 const getRoutesToPoint = async (req) => {
-  const lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
-  const lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
+  let lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
+  let lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
+  const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
+  const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
+
+  if (altLat && altLng && lat && lng) {
+    const roads = await getLocalLinestrings(lat, lng, false, true);
+    const {nearestPointInNetwork: nearestPointInRoads} = getPathFinder(roads);
+    const mainPoint = nearestPointInRoads([lng, lat]);
+    const altPoint = nearestPointInRoads([altLng, altLat]);
+    if (distance([ lng, lat ], mainPoint) > distance([ altLng, altLat ], altPoint)) {
+      lat = altLat;
+      lng = altLng;
+    }
+  }
 
   let destinationType = 'parking';
   if (req.query && req.query.destination) {

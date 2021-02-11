@@ -15,9 +15,9 @@ const addDensityAndMerge = (lines) => {
   return featureCollection(lines);
 }
 
-const getLocalLinestrings = (lat, lng, onlyTrails) => {
+const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads) => {
   const totalRoadObjects = onlyTrails ? 0 : 9;
-  const totalTrailObjects = 1;
+  const totalTrailObjects = onlyRoads ? 0 : 1;
   const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
 
   return new Promise((resolve, reject) => {
@@ -55,32 +55,34 @@ const getLocalLinestrings = (lat, lng, onlyTrails) => {
         top -= 0.1;
       }
     }
-    Trail.find({
-      center: {
-        $nearSphere: {
-          $geometry: {
-            type : 'Point',
-              coordinates : [ lng, lat ],
+    if (!onlyRoads) {
+      Trail.find({
+        center: {
+          $nearSphere: {
+            $geometry: {
+              type : 'Point',
+                coordinates : [ lng, lat ],
+              },
+              $maxDistance: 1609.34 * 10, // meters in a mile * number of miles
             },
-            $maxDistance: 1609.34 * 10, // meters in a mile * number of miles
-          },
-       },
-    }).then(trails => {
-      if (trails) {
-        trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id})))
-      }
-      returnedObjects++;
-      if (returnedObjects === totalReturnedObjects) {
-        resolve(addDensityAndMerge(lines))
-      }
-    })
-    .catch(error => {
-      console.error(error);
-      returnedObjects++;
-      if (returnedObjects === totalReturnedObjects) {
-        resolve(addDensityAndMerge(lines))
-      }
-    });
+         },
+      }).then(trails => {
+        if (trails) {
+          trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id})))
+        }
+        returnedObjects++;
+        if (returnedObjects === totalReturnedObjects) {
+          resolve(addDensityAndMerge(lines))
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        returnedObjects++;
+        if (returnedObjects === totalReturnedObjects) {
+          resolve(addDensityAndMerge(lines))
+        }
+      });
+    }
   });
 }
 
