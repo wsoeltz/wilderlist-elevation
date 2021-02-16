@@ -18,6 +18,9 @@ const getRoutesToPoint = async (req) => {
   let lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
   const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
+  const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
+  const minIndex = (page - 1) * 3;
+  const maxIndex = page * 3;
 
   if (altLat && altLng && lat && lng) {
     const roads = await getLocalLinestrings(lat, lng, false, true);
@@ -46,13 +49,13 @@ const getRoutesToPoint = async (req) => {
     let destinations;
     if (destinationType === 'campsites') {
       const response = await getNearestCampsites(lat, lng);
-      destinations = response.slice(0, 10);
+      destinations = response.slice(minIndex, maxIndex);
     } else if (destinationType === 'mountains') {
       const response = await getNearestMountains(lat, lng);
-      destinations = response.slice(0, 10);
+      destinations = response.slice(minIndex, maxIndex);
     } else {
       const response = await getNearestParking(lat, lng);
-      destinations = response.slice(0, 10);
+      destinations = response.slice(minIndex, maxIndex);
     }
 
     if (destinations && geojson) {
