@@ -11,7 +11,6 @@ const getNearestParking = async (lat, lng) => {
               coordinates : [ lng, lat ],
            },
            $maxDistance: 32186, // 20 miles
-           $minDistance: 1600,  // 1 mile
         },
      },
   }).limit(50);
