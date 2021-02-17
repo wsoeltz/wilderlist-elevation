@@ -16,7 +16,7 @@ const addDensityAndMerge = (lines) => {
 }
 
 const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads) => {
-  const totalRoadObjects = onlyTrails ? 0 : 9;
+  const totalRoadObjects = onlyTrails ? 0 : 1;
   const totalTrailObjects = onlyRoads ? 0 : 1;
   const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
 
@@ -27,8 +27,13 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads) => {
 
     const fixedLat = parseFloat(lat.toFixed(1));
     const fixedLng = parseFloat(lng.toFixed(1));
-    let top = parseFloat(fixedLat + 0.1);
-    let left = parseFloat(fixedLng - 0.1);
+    // const leftOrRight = Math.round(lng) < lng ? 'right' : 'left';
+    // const topOrBottom = Math.round(lat) < lat ? 'top' : 'bottom';
+    // console.log(leftOrRight, topOrBottom);
+    // let top = topOrBottom === 'top' ? parseFloat(fixedLat + 0.1) : fixedLat;
+    let top = fixedLat;
+    let left = fixedLng;
+    // let left = leftOrRight === 'left' ? parseFloat(fixedLng - 0.1) : fixedLng;
     for (let i = 0; i < totalRoadObjects; i++) {
       const tileFolder = `LNG__${left.toFixed(1).replace('.', '_')}/`;
       const tileFile = `LAT__${top.toFixed(1).replace('.', '_')}.json`;

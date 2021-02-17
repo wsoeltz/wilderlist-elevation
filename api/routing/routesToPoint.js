@@ -18,6 +18,7 @@ const getRoutesToPoint = async (req) => {
   let lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
   const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
+  const returnRawDataInstead = req.query && req.query.raw === 'true' ? true : false;
   const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
   const minIndex = (page - 1) * 3;
   const maxIndex = page * 3;
@@ -59,6 +60,9 @@ const getRoutesToPoint = async (req) => {
     }
 
     if (destinations && geojson) {
+      if (returnRawDataInstead) {
+        return {geojson, destinations};
+      }
       const {pathFinder, nearestPointInNetwork} = getPathFinder(geojson);
       const endPoint = nearestPointInNetwork([lng, lat]);
       const distanceFromActualToGraphPoint = distance([ lng, lat ], endPoint, {units: 'miles'});
