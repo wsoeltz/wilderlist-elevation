@@ -65,7 +65,7 @@ const getDirectionsPointToPoint = async (req) => {
           ? parking[i].name
           : (m.returnedName && m.returnedName.length ? m.returnedName : null);
         const originType = parking[i] && parking[i].type && parking[i].type.length
-          ? parking[i].type.length
+          ? parking[i].type
           : null;
         return {
           originName,
