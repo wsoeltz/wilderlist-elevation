@@ -12,6 +12,7 @@ const {getElevationForLine} = require('../../utilities/getElevation');
 const asyncForEach = require('../../utilities/asyncForEach');
 const distance = require('@turf/distance').default;
 const length = require('@turf/length').default;
+const {writeRoutesCache, readRoutesCache} = require('./simpleCache');
 
 const getRoutesToPoint = async (req) => {
   let lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
@@ -43,6 +44,12 @@ const getRoutesToPoint = async (req) => {
     }
   }
 
+  const key = `${lat}${lng}${altLat}${altLng}${returnRawDataInstead}${page}${destinationType}`;
+
+  const cached = readRoutesCache(key);
+  if (cached && cached.data) {
+    return cached.data;
+  }
 
   let output = {};
 
@@ -120,6 +127,7 @@ const getRoutesToPoint = async (req) => {
     output = {error: 'Unable to get routes'};
   }
 
+  writeRoutesCache(key, output);
   return output;
 }
 
