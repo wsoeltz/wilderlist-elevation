@@ -65,8 +65,7 @@ const getRoutesToPoint = async (req) => {
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {
-        return geojson;
-        // return {geojson, destinations};
+        return {geojson, destinations};
       }
       const {pathFinder, nearestPointInNetwork} = getPathFinder(geojson);
       const endPoint = nearestPointInNetwork([lng, lat]);
