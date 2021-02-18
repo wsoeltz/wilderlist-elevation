@@ -54,7 +54,7 @@ const getRoutesToPoint = async (req) => {
   let output = {};
 
   if (lat && lng) {
-    const geojson = await getLocalLinestrings(lat, lng, destinationType === 'parking');
+    const geojson = await getLocalLinestrings(lat, lng, destinationType === 'parking', false, true);
 
 
     let destinations;
