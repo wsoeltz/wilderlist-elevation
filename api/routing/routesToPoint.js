@@ -20,8 +20,8 @@ const getRoutesToPoint = async (req) => {
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
   const returnRawDataInstead = req.query && req.query.raw === 'true' ? true : false;
   const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
-  const minIndex = (page - 1) * 3;
-  const maxIndex = page * 3;
+  const minIndex = (page - 1) * 5;
+  const maxIndex = page * 5;
 
   if (altLat && altLng && lat && lng) {
     const roads = await getLocalLinestrings(lat, lng, false, true);
@@ -43,10 +43,13 @@ const getRoutesToPoint = async (req) => {
     }
   }
 
+
   let output = {};
 
   if (lat && lng) {
     const geojson = await getLocalLinestrings(lat, lng, destinationType === 'parking');
+
+
     let destinations;
     if (destinationType === 'campsites') {
       const response = await getNearestCampsites(lat, lng);
@@ -58,6 +61,7 @@ const getRoutesToPoint = async (req) => {
       const response = await getNearestParking(lat, lng);
       destinations = response.slice(minIndex, maxIndex);
     }
+
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {
@@ -72,6 +76,7 @@ const getRoutesToPoint = async (req) => {
           const startPoint = nearestPointInNetwork(p.location);
           if (destinationType === 'parking' || distance(p.location, startPoint, {units: 'miles'}) < 0.15) {
             const path = pathFinder.findPath(startPoint, endPoint);
+
             if (path && path.path && path.path.length > 1) {
               const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
               const destination = p;

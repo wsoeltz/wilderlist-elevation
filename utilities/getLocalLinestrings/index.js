@@ -68,10 +68,10 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads) => {
               type : 'Point',
                 coordinates : [ lng, lat ],
               },
-              $maxDistance: 1609.34 * 10, // meters in a mile * number of miles
+              $maxDistance: 1609.34 * 8, // meters in a mile * number of miles
             },
          },
-      }).then(trails => {
+      }).then(trails => {  
         if (trails) {
           trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id})))
         }

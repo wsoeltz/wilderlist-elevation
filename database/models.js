@@ -71,14 +71,19 @@ const TrailSchema = new Schema({
   allowsHorses: { type: Boolean },
   parents: [{
     type: Schema.Types.ObjectId,
-    ref: 'trails',
+    ref: 'trail',
   }],
   children: [{
     type: Schema.Types.ObjectId,
-    ref: 'trails',
+    ref: 'trail',
   }],
   waterCrossing: { type: String },
   skiTrail: { type: Boolean },
+  flag: { type: String },
+  locationText: { type: String },
+  locationTextShort: { type: String },
+  trailLength: { type: Number },
+  avgSlope: { type: Number },
 });
 
 TrailSchema.index({ center: '2dsphere' });

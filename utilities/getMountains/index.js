@@ -10,7 +10,7 @@ const getNearestMountains = async (lat, lng) => {
               type : 'Point',
               coordinates : [ lng, lat ],
            },
-           $maxDistance: 32186, // 20 miles
+           $maxDistance: 1609.34 * 10, // meters in a mile * number of miles
         },
      },
   }).limit(10);
