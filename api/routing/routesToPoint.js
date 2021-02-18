@@ -65,7 +65,8 @@ const getRoutesToPoint = async (req) => {
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {
-        return {geojson, destinations};
+        return geojson;
+        // return {geojson, destinations};
       }
       const {pathFinder, nearestPointInNetwork} = getPathFinder(geojson);
       const endPoint = nearestPointInNetwork([lng, lat]);
@@ -80,7 +81,7 @@ const getRoutesToPoint = async (req) => {
             if (path && path.path && path.path.length > 1) {
               const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
               const destination = p;
-              const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
+              // const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
               paths.push(lineString(path.path, {trails, destination}));
               // const destLat = p.location[1];
               // const destLng = p.location[0];

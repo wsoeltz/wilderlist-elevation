@@ -68,7 +68,7 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads) => {
               type : 'Point',
                 coordinates : [ lng, lat ],
               },
-              $maxDistance: 1609.34 * 8, // meters in a mile * number of miles
+              $maxDistance: 1609.34 * 6.75, // meters in a mile * number of miles
             },
          },
       }).then(trails => {  
