@@ -87,8 +87,8 @@ const getRoutesToPoint = async (req) => {
             if (path && path.path && path.path.length > 1) {
               const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
               const destination = p;
-              // const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
-              paths.push(lineString(path.path, {trails, destination}));
+              const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
+              paths.push(lineString(line, {trails, destination}));
               // const destLat = p.location[1];
               // const destLng = p.location[0];
               // const destEle = p.elevation;
