@@ -155,11 +155,11 @@ const getWeatherData = async (latitude, longitude) => {
   try {
     const nwsData = await getNWSData(latitude, longitude);
     if (nwsData) {
-      return {source: ForecastSource.NWS, data: nwsData};
+      return {source: ForecastSource.NWS, location: [longitude, latitude], data: nwsData};
     } else {
       const openWeatherData = await getOpenWeatherData(latitude, longitude);
       if (openWeatherData && openWeatherData.data) {
-        return {source: ForecastSource.OpenWeatherMap, data: openWeatherData.data};
+        return {source: ForecastSource.OpenWeatherMap, location: [longitude, latitude], data: openWeatherData.data};
       } else {
         return {error: 'There was an error retrieving the weather'};
       }
