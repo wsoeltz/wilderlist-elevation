@@ -37,7 +37,7 @@ const getDistanceMatrix = async (lat, lng, destinations) => {
     const res = await mapBoxDirections(lat, lng, destinations);
     if (res && res.data) {
       const matrix = res.data.durations[0].map((duration, i) => {
-        const adjustedDuration = duration * 0.98;
+        const adjustedDuration = duration * 1;
         let hours = Math.floor(adjustedDuration / 60 / 60);
         let minutes = Math.round(((adjustedDuration / 60 / 60) - hours) * 60);
         if (minutes === 60) {

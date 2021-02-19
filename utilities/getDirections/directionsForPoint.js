@@ -8,9 +8,6 @@ const cache = setupCache({
 const fetchMapBoxData = axios.create({
   adapter: cache.adapter,
 });
-const fetchOSRMData = axios.create({
-  adapter: cache.adapter,
-});
 
 // interface RouteDatum {
 //   distance: number;
@@ -32,23 +29,6 @@ const fetchOSRMData = axios.create({
 //   miles: number;
 //   coordinates: Array<[number, number]>;
 // }
-
-const openStreetMapDirections = async (lat1, lng1, lat2, lng2) => {
-  try {
-    const response = await fetchOSRMData(
-      `//router.project-osrm.org/route/v1/driving/${lng1 + ',' + lat1};${lng2 + ',' + lat2}` +
-      '?geometries=geojson&overview=full',
-    );
-    if (response) {
-      return response;
-    } else {
-      return null;
-    }
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-};
 
 const mapBoxDirections = async (lat1, lng1, lat2, lng2) => {
   try {
@@ -73,16 +53,11 @@ const mapBoxDirections = async (lat1, lng1, lat2, lng2) => {
 const getDrivingDistance = async (lat1, lng1, lat2, lng2) => {
   try {
     let res;
-    const openStreetMapResponse = await openStreetMapDirections(lat1, lng1, lat2, lng2);
-    if (openStreetMapResponse !== null) {
-      res = openStreetMapResponse;
+    const mapBoxResponse = await mapBoxDirections(lat1, lng1, lat2, lng2);
+    if (mapBoxResponse !== null) {
+      res = mapBoxResponse;
     } else {
-      const mapBoxResponse = await mapBoxDirections(lat1, lng1, lat2, lng2);
-      if (mapBoxResponse !== null) {
-        res = mapBoxResponse;
-      } else {
-        res = null;
-      }
+      res = null;
     }
     if (res && res.data && res.data.routes && res.data.routes[0] &&
         res.data.routes[0].distance && res.data.routes[0].duration) {
@@ -92,7 +67,10 @@ const getDrivingDistance = async (lat1, lng1, lat2, lng2) => {
       const hours = Math.floor(adjustedDuration / 60 / 60);
       const minutes = Math.round(((adjustedDuration / 60 / 60) - hours) * 60);
       const miles = Math.round(distance * 0.00062137);
-      return {hours, minutes, miles, coordinates};
+      const name = res.data.waypoints && res.data.waypoints.length && res.data.waypoints[res.data.waypoints.length - 1]
+        && res.data.waypoints[res.data.waypoints.length - 1].name
+        ? res.data.waypoints[res.data.waypoints.length - 1].name : null;
+      return {name, hours, minutes, miles, coordinates};
     } else {
       return null;
     }

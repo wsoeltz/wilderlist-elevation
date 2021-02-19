@@ -57,10 +57,10 @@ const getDirectionsPointToPoint = async (req) => {
 
   const parking = await getNearestParking(lat2, lng2);
   if (parking && parking.length) {
-    const destinations = parking.map(p => p.location);
+    const destinations = parking.slice(0, 5).map(p => p.location);
     const matrixRespone = await getDistanceMatrix(lat1, lng1, destinations);
     if (matrixRespone) {
-      output = matrixRespone.slice(0, 7).map((m, i) => {
+      output = matrixRespone.map((m, i) => {
         const originName = parking[i] && parking[i].name && parking[i].name.length
           ? parking[i].name
           : (m.returnedName && m.returnedName.length ? m.returnedName : null);
@@ -77,6 +77,20 @@ const getDirectionsPointToPoint = async (req) => {
           minutes: m.minutes,
         }
       })
+    }
+  } else {
+    const result = await getDrivingDistance(lat1, lng1, lat2, lng2);
+    if (result && result.coordinates && result.coordinates[result.coordinates.length - 1]) {
+      return [
+        {
+          originName: result.name ? result.name : 'SOURCE',
+          originType: 'SOURCE',
+          originLat: result.coordinates[result.coordinates.length - 1][1],
+          originLng: result.coordinates[result.coordinates.length - 1][0],
+          ...result,
+        }
+      ]
+
     }
   }
 
