@@ -17,7 +17,7 @@ const getWeatherAtPoint = async (req) => {
 
   if (lat && lng) {
     const result = await getWeatherData(lat, lng);
-    output = result;
+    output = {forecast: result, location: [lng, lat]};
   } else {
     output = {error: 'Unable to get weather'};
   }

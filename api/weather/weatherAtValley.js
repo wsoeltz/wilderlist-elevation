@@ -35,7 +35,7 @@ const getWeatherAtPoint = async (req) => {
     const sortedByElevation = sortBy(parkingWithElevation, ['elevation'], ['asc']);
     const location = sortedByElevation.length ? sortedByElevation[0].location : [lng, lat];
     const result = await getWeatherData(...location.reverse());
-    output = result;
+    output = {forecast: result, location};
   } else {
     output = {error: 'Unable to get weather'};
   }
