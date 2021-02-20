@@ -12,6 +12,7 @@ require('./database/connect');
 const fs = require('fs');
 const {TileSet} = require('node-hgt')
 const getPointInfo = require('./api/pointInfo');
+const getSnowReportNearPoint = require('./api/weather/snowReportNearPoint');
 const getLineElevation = require('./api/lineElevation');
 const getDirectionsPointToPoint = require('./api/directionsPointToPoint');
 const directionsToParking = require('./api/directionsToParking');
@@ -198,6 +199,17 @@ app.get('/api/local-linestrings', async (req, res) => {
 app.get('/api/routes-to-point', async (req, res) => {
   try {
     const response = await getRoutesToPoint(req);
+    res.json(response);
+  } catch (err) {
+    console.error(err)
+    res.status(500);
+    res.send(err);
+  }
+});
+
+app.get('/api/snow-report', async (req, res) => {
+  try {
+    const response = await getSnowReportNearPoint(req);
     res.json(response);
   } catch (err) {
     console.error(err)

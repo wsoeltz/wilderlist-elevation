@@ -41,6 +41,7 @@ const getPointInfo = async (req) => {
     try {
       const state = states.features.find(feature => booleanPointInPolygon(geojsonPoint, feature));
       if (state) {
+        console.log(state);
         output.state_name = state.properties.NAME;
         stateNumber = state.properties.STATE;
         try {
