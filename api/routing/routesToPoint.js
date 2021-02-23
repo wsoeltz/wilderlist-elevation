@@ -24,6 +24,8 @@ const getRoutesToPoint = async (req) => {
   const minIndex = (page - 1) * 5;
   const maxIndex = page * 5;
 
+  let endLat = lat;
+  let endLng = lng;
   if (altLat && altLng && lat && lng) {
     const roads = await getLocalLinestrings(lat, lng, false, true);
     const {nearestPointInNetwork: nearestPointInRoads} = getPathFinder(roads);
@@ -32,6 +34,9 @@ const getRoutesToPoint = async (req) => {
     if (distance([ lng, lat ], mainPoint) > distance([ altLng, altLat ], altPoint)) {
       lat = altLat;
       lng = altLng;
+    } else {
+      endLat = altLat;
+      endLng = altLng;
     }
   }
 
@@ -54,21 +59,23 @@ const getRoutesToPoint = async (req) => {
   let output = {};
 
   if (lat && lng) {
-    const geojson = await getLocalLinestrings(lat, lng, destinationType === 'parking', false, true);
+    const onlyUseTrails = destinationType === 'parking' || destinationType === 'mountains';
+    const onlyRoads = false;
+    const allowLimits = true;
+    const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits);
 
 
     let destinations;
     if (destinationType === 'campsites') {
-      const response = await getNearestCampsites(lat, lng);
+      const response = await getNearestCampsites(endLat, endLng);
       destinations = response.slice(minIndex, maxIndex);
     } else if (destinationType === 'mountains') {
-      const response = await getNearestMountains(lat, lng);
+      const response = await getNearestMountains(endLat, endLng);
       destinations = response.slice(minIndex, maxIndex);
     } else {
       const response = await getNearestParking(lat, lng);
       destinations = response.slice(minIndex, maxIndex);
     }
-
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {
