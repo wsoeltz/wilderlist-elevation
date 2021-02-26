@@ -29,6 +29,7 @@ const getDirectionsPointToPoint = async (req) => {
   const lng1 = req.query && req.query.lng1 ? parseFloat(req.query.lng1) : undefined;
   const lat2 = req.query && req.query.lat2 ? parseFloat(req.query.lat2) : undefined;
   const lng2 = req.query && req.query.lng2 ? parseFloat(req.query.lng2) : undefined;
+  const limit = req.query && req.query.limit ? parseInt(req.query.limit, 10) : 5;
   const considerDirect = req.query && req.query.direct && req.query.direct === 'true'  ? true : false;
 
   let output = [];
@@ -57,7 +58,7 @@ const getDirectionsPointToPoint = async (req) => {
 
   const parking = await getNearestParking(lat2, lng2);
   if (parking && parking.length) {
-    const destinations = parking.slice(0, 5).map(p => p.location);
+    const destinations = parking.slice(0, limit).map(p => p.location);
     const matrixRespone = await getDistanceMatrix(lat1, lng1, destinations);
     if (matrixRespone) {
       output = matrixRespone.map((m, i) => {
