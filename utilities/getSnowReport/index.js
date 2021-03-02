@@ -19,7 +19,7 @@ const getSnowDepthUrl = (state, year, month) => {
 
 const getStationUrl = id => `https://www.ncdc.noaa.gov/cdo-web/datasets/GHCND/stations/GHCND:${id}/detail`;
 
-const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) => {
+const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) => {  
   if (attempt < 3) {
     try {
       const year = today.getFullYear();
@@ -64,10 +64,11 @@ const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) =
       const stationsSortedByDistance = orderBy(stationsArray, ['hasRecentValue', 'distance'], ['desc', 'asc']);
       return stationsSortedByDistance;
     } catch (error) {
-      console.error(error);
+
+      // console.error(error);
       const lastMonth = new Date(today);
       lastMonth.setMonth(lastMonth.getMonth()-1);
-      const response = await fetchSnowData(stateAbbr, originPoint, lastMonth, attempt + 1);
+      const response = await fetchSnowData(getUrlFn, originPoint, stateAbbr, lastMonth, attempt + 1);
       return response;
     }
   } else {
