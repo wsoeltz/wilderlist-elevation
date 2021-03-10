@@ -47,7 +47,7 @@ const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) =
           let mostRecentValue = 'M';
           let daysToGoBack = 0;
           while (mostRecentValue === 'M' && daysToGoBack !== values.length) {
-            mostRecentValue = values[daysToGoBack - 1];
+            mostRecentValue = values[values.length - daysToGoBack - 1];
             daysToGoBack++;
           }
           stationsArray.push({
