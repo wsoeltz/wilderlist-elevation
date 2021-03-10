@@ -44,7 +44,12 @@ const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) =
           for (const i in station.values) {
             values.push(station.values[i]);
           }
-          const mostRecentValue = values[values.length - 1];
+          let mostRecentValue = 'M';
+          let daysToGoBack = 0;
+          while (mostRecentValue === 'M' && daysToGoBack !== values.length) {
+            mostRecentValue = values[daysToGoBack - 1];
+            daysToGoBack++;
+          }
           stationsArray.push({
             ghcnid: station.ghcnid,
             url: getStationUrl(station.ghcnid),
@@ -52,7 +57,7 @@ const fetchSnowData = async (getUrlFn, originPoint, stateAbbr, today, attempt) =
             county: station.county,
             elevation: station.elev,
             coordinates: [station.lon, station.lat],
-            day: values.length,
+            day: values.length - daysToGoBack,
             month,
             year,
             distance: distance(originPoint, point([station.lon, station.lat]), {units: 'miles'}),
