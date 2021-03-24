@@ -19,6 +19,7 @@ const getRoutesToPoint = async (req) => {
   let lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
   const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
+  const destinationId = req.query && req.query.destination ? req.query.destination : undefined;
   const returnRawDataInstead = req.query && req.query.raw === 'true' ? true : false;
   const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
   const minIndex = (page - 1) * 5;
@@ -49,7 +50,7 @@ const getRoutesToPoint = async (req) => {
     }
   }
 
-  const key = `${lat}${lng}${altLat}${altLng}${returnRawDataInstead}${page}${destinationType}`;
+  const key = `${lat}${lng}${altLat}${altLng}${returnRawDataInstead}${page}${destinationType}${destinationId}`;
 
   const cached = readRoutesCache(key);
   if (cached && cached.data) {
@@ -62,8 +63,6 @@ const getRoutesToPoint = async (req) => {
     const onlyUseTrails = destinationType === 'parking' || destinationType === 'mountains';
     const onlyRoads = false;
     const allowLimits = true;
-    const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits);
-
 
     let destinations;
     if (destinationType === 'campsites') {
@@ -76,6 +75,16 @@ const getRoutesToPoint = async (req) => {
       const response = await getNearestParking(lat, lng);
       destinations = response.slice(minIndex, maxIndex);
     }
+    let furthestDistanceInMiles = 1;
+    destinations.forEach(d => {
+      const distanceFromOrigin = distance([ lng, lat ], d.location, {units: 'miles'});
+      if (distanceFromOrigin > furthestDistanceInMiles) {
+        furthestDistanceInMiles = distanceFromOrigin;
+      }
+    });
+    const maxDistanceInMiles = furthestDistanceInMiles + 2.5;
+
+    const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits, maxDistanceInMiles);
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {

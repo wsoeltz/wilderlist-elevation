@@ -16,10 +16,11 @@ const addDensityAndMerge = (lines) => {
   return featureCollection(lines);
 }
 
-const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits) => {
+const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMiles) => {
   const totalRoadObjects = onlyTrails ? 0 : 1;
   const totalTrailObjects = onlyRoads ? 0 : 1;
   const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
+  const maxMeters = maxMiles ? 1609.34 * maxMiles: 1609.34 * 8; // meters in a mile * number of miles
 
   return new Promise((resolve, reject) => {
 
@@ -86,7 +87,7 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits) => {
               type : 'Point',
                 coordinates : [ lng, lat ],
               },
-              $maxDistance: 1609.34 * 8, // meters in a mile * number of miles
+              $maxDistance: maxMeters,
             },
          },
       })
