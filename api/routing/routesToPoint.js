@@ -84,6 +84,10 @@ const getRoutesToPoint = async (req) => {
     });
     const maxDistanceInMiles = furthestDistanceInMiles + 2.5;
 
+    if (destinationId) {
+      destinations = destinations.filter(d => destinationId === d._id.toString());
+    }
+
     const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits, maxDistanceInMiles);
 
     if (destinations && geojson) {
@@ -105,11 +109,6 @@ const getRoutesToPoint = async (req) => {
               const destination = p;
               const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
               paths.push(lineString(line, {trails, destination}));
-              // const destLat = p.location[1];
-              // const destLng = p.location[0];
-              // const destEle = p.elevation;
-              // const name = p.name;
-              // paths.push(lineString(path.path, {trails, destination, destLat,destLng,destEle, name}));
             }
           }
         });
