@@ -19,7 +19,7 @@ const getRoutesToPoint = async (req) => {
   let lng = req.query && req.query.lng ? parseFloat(req.query.lng) : undefined;
   const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
-  const destinationId = req.query && req.query.destination ? req.query.destination : undefined;
+  const destinationId = req.query && req.query.destination_id ? req.query.destination_id : undefined;
   const returnRawDataInstead = req.query && req.query.raw === 'true' ? true : false;
   const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
   const minIndex = (page - 1) * 5;
