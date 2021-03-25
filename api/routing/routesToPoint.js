@@ -20,6 +20,7 @@ const getRoutesToPoint = async (req) => {
   const altLat = req.query && req.query.alt_lat ? parseFloat(req.query.alt_lat) : undefined;
   const altLng = req.query && req.query.alt_lng ? parseFloat(req.query.alt_lng) : undefined;
   const destinationId = req.query && req.query.destination_id ? req.query.destination_id : undefined;
+  const returnSegments = req.query && req.query.segments === 'true' ? true : false;
   const returnRawDataInstead = req.query && req.query.raw === 'true' ? true : false;
   const page = req.query && req.query.page ? parseInt(req.query.page) : 1;
   const minIndex = (page - 1) * 5;
@@ -99,16 +100,76 @@ const getRoutesToPoint = async (req) => {
       const distanceFromActualToGraphPoint = distance([ lng, lat ], endPoint, {units: 'miles'});
       const paths = [];
       if (distanceFromActualToGraphPoint < 0.1) {
-        destinations.forEach(p => {
+        await asyncForEach(destinations, async p => {
           const startPoint = nearestPointInNetwork(p.location);
           if (destinationType === 'parking' || distance(p.location, startPoint, {units: 'miles'}) < 0.15) {
             const path = pathFinder.findPath(startPoint, endPoint);
 
             if (path && path.path && path.path.length > 1) {
-              const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
-              const destination = p;
               const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
-              paths.push(lineString(line, {trails, destination}));
+              const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
+              const trailSegments = [];
+              try {
+                if (returnSegments) {
+                  let currentId = null;
+                  const lineStringSegments = [];
+                  await asyncForEach(line, async coord => {
+                    const nearestPoint = nearestPointInNetwork(coord);
+                    if (nearestPoint && nearestPoint.properties.id) {
+                      const id = nearestPoint.properties.id;
+                      if (id !== currentId || !lineStringSegments.length) {
+                        currentId = id;
+                        if (lineStringSegments.length) {
+                          // push the last coord to the previous line so that there is overlap
+                          lineStringSegments[lineStringSegments.length - 1].geometry.coordinates.push(coord);
+                        }
+                        lineStringSegments.push({
+                          type: 'Feature',
+                          properties: {
+                            name: nearestPoint.properties.name,
+                            type: nearestPoint.properties.type,
+                            id,
+                            index: lineStringSegments.length,
+                          },
+                          geometry: {
+                            type: 'LineString',
+                            coordinates: [coord],
+                          }
+                        })
+                      } else {
+                        lineStringSegments[lineStringSegments.length - 1].geometry.coordinates.push(coord);
+                      }
+                    }
+                  });
+                  const validSegments = lineStringSegments.filter(t => t.geometry.coordinates.length > 1);
+                  await asyncForEach(validSegments, async p => {
+                      const routeLength = length(p, {units: 'miles'});    
+                      const elevationData = await getElevationForLine(p.geometry.coordinates, true, true);
+                      const properties = {
+                        ...p.properties,
+                        routeLength,
+                        elevationGain: elevationData.elevationGain,
+                        elevationLoss: elevationData.elevationLoss,
+                        elevationMin: elevationData.minElevation,
+                        elevationMax: elevationData.maxElevation,
+                        avgSlope: elevationData.averageSlopeAngle,
+                        maxSlope: elevationData.maxSlope,
+                        minSlope: elevationData.minSlope,
+                      }
+                      const geometry = {...p.geometry, coordinates: elevationData.elevationLine}
+                      trailSegments.push({
+                        ...p,
+                        geometry,
+                        properties,
+                      })
+                    }
+                  );
+                }
+              } catch (err) {
+                console.error(err);
+              }
+              const destination = p;
+              paths.push(lineString(line, {trails, destination, trailSegments}));
             }
           }
         });

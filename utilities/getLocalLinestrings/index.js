@@ -44,7 +44,10 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMi
       if (cached && cached.data) {
         if (!(allowLimits && cached.data.length > 7000)) {
           // don't include huge road files for performance if allow limits is on
-          cached.data.forEach(d => lines.push(lineString(d.line, {name: d.name, type: 'road'})))
+          cached.data.forEach(d => lines.push(lineString(d.line, {
+            name: d.name, type: 'road',
+            id: `${d.name}${d.line.length}${d.line[0][0]}${d.line[0][1]}${d.line[d.line.length-1][0]}${d.line[d.line.length - 1][1]}`.trim().toUpperCase(),
+          })))
         }
         returnedObjects++;
         if (returnedObjects === totalReturnedObjects) {
@@ -57,7 +60,10 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMi
               writeRoadsCache(url, response.data);
               if (!(allowLimits && response.data.length > 7000)) {
                 // don't include huge road files for performance if allow limits is on
-                response.data.forEach(d => lines.push(lineString(d.line, {name: d.name, type: 'road'})))
+                response.data.forEach(d => lines.push(lineString(d.line, {
+                  name: d.name, type: 'road',
+                  id: `${d.name}${d.line.length}${d.line[0][0]}${d.line[0][1]}${d.line[d.line.length-1][0]}${d.line[d.line.length - 1][1]}`.trim().toUpperCase(),
+                })))
               }
             }
             returnedObjects++;
@@ -94,7 +100,7 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMi
       .limit(allowLimits ? 7000 : 0)
       .then(trails => {
         if (trails) {
-          trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id})))
+          trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id.toString()})))
         }
         returnedObjects++;
         if (returnedObjects === totalReturnedObjects) {
