@@ -13,6 +13,7 @@ const asyncForEach = require('../../utilities/asyncForEach');
 const distance = require('@turf/distance').default;
 const length = require('@turf/length').default;
 const {writeRoutesCache, readRoutesCache} = require('./simpleCache');
+const mergeSmallSegments = require('./mergeSmallSegments');
 
 const getRoutesToPoint = async (req) => {
   let lat = req.query && req.query.lat ? parseFloat(req.query.lat) : undefined;
@@ -89,7 +90,7 @@ const getRoutesToPoint = async (req) => {
       destinations = destinations.filter(d => destinationId === d._id.toString());
     }
 
-    const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits, maxDistanceInMiles);
+    const geojson = await getLocalLinestrings(lat, lng, onlyUseTrails, onlyRoads, allowLimits, maxDistanceInMiles, returnSegments);
 
     if (destinations && geojson) {
       if (returnRawDataInstead) {
@@ -109,6 +110,7 @@ const getRoutesToPoint = async (req) => {
               const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
               const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
               const trailSegments = [];
+              const totalLength = length(lineString(line), {units: 'miles'});
               try {
                 if (returnSegments) {
                   let currentId = null;
@@ -130,6 +132,7 @@ const getRoutesToPoint = async (req) => {
                             type: nearestPoint.properties.type,
                             id,
                             index: lineStringSegments.length,
+                            parents: nearestPoint.properties.parents,
                           },
                           geometry: {
                             type: 'LineString',
@@ -142,8 +145,9 @@ const getRoutesToPoint = async (req) => {
                     }
                   });
                   const validSegments = lineStringSegments.filter(t => t.geometry.coordinates.length > 1);
-                  await asyncForEach(validSegments, async p => {
-                      const routeLength = length(p, {units: 'miles'});    
+                  const mergedSegments = mergeSmallSegments(validSegments, totalLength);
+                  await asyncForEach(mergedSegments, async p => {
+                      const routeLength = length(p, {units: 'miles'});
                       const elevationData = await getElevationForLine(p.geometry.coordinates, true, true);
                       const properties = {
                         ...p.properties,

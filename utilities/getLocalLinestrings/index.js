@@ -16,7 +16,7 @@ const addDensityAndMerge = (lines) => {
   return featureCollection(lines);
 }
 
-const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMiles) => {
+const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMiles, includeParents) => {
   const totalRoadObjects = onlyTrails ? 0 : 1;
   const totalTrailObjects = onlyRoads ? 0 : 1;
   const totalReturnedObjects = totalRoadObjects + totalTrailObjects;
@@ -100,7 +100,12 @@ const getLocalLinestrings = (lat, lng, onlyTrails, onlyRoads, allowLimits, maxMi
       .limit(allowLimits ? 7000 : 0)
       .then(trails => {
         if (trails) {
-          trails.forEach(t => lines.push(lineString(t.line, {name: t.name, type: t.type, id: t._id.toString()})))
+          trails.forEach(t =>
+            lines.push(lineString(t.line, {
+              name: t.name, type: t.type, id: t._id.toString(),
+              parents: includeParents && t.parents && t.parents.length ? t.parents : undefined,
+            }))
+          )
         }
         returnedObjects++;
         if (returnedObjects === totalReturnedObjects) {
