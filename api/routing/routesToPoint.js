@@ -96,7 +96,7 @@ const getRoutesToPoint = async (req) => {
       if (returnRawDataInstead) {
         return {geojson, destinations};
       }
-      const {pathFinder, nearestPointInNetwork} = getPathFinder(geojson);
+      const {pathFinder, nearestPointInNetwork, getFilteredNetwork} = getPathFinder(geojson);
       const endPoint = nearestPointInNetwork([lng, lat]);
       const distanceFromActualToGraphPoint = distance([ lng, lat ], endPoint, {units: 'miles'});
       const paths = [];
@@ -110,13 +110,15 @@ const getRoutesToPoint = async (req) => {
               const line = destinationType !== 'parking' ? path.path.reverse() : path.path;
               const trails = uniqBy(path.edgeDatas.map(({reducedEdge}) => reducedEdge), 'id');
               const trailSegments = [];
-              const totalLength = length(lineString(line), {units: 'miles'});
+              const basePath = lineString(line);
+              const totalLength = length(basePath, {units: 'miles'});
               try {
                 if (returnSegments) {
                   let currentId = null;
                   const lineStringSegments = [];
+                  const nearestPointInFilteredNetwork = getFilteredNetwork(basePath);
                   await asyncForEach(line, async coord => {
-                    const nearestPoint = nearestPointInNetwork(coord);
+                    const nearestPoint = nearestPointInFilteredNetwork(coord);
                     if (nearestPoint && nearestPoint.properties.id) {
                       const id = nearestPoint.properties.id;
                       if (id !== currentId || !lineStringSegments.length) {

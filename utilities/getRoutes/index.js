@@ -1,7 +1,11 @@
 const PathFinder = require('geojson-path-finder');
-const {point} = require('@turf/helpers');
+const {point, featureCollection} = require('@turf/helpers');
 const explode = require('@turf/explode');
 const nearestPoint = require('@turf/nearest-point').default;
+const getBbox = require('@turf/bbox').default;
+const bboxPolygon = require('@turf/bbox-polygon').default;
+const booleanPointInPolygon = require('@turf/boolean-point-in-polygon').default;
+const {featureEach} = require('@turf/meta');
 
 const getPathFinder = (geojson) => {
   const pathFinder = new PathFinder(geojson, {
@@ -28,8 +32,24 @@ const getPathFinder = (geojson) => {
 
   const graph = explode(geojson);
   const nearestPointInNetwork = (coords) => nearestPoint(point(coords), graph);
+  const getFilteredNetwork = line => {
+    try {
+      const bbox = bboxPolygon(getBbox(line));
+      const newPoints = [];
+      featureEach(graph, function (currentFeature, featureIndex) {
+        if (booleanPointInPolygon(currentFeature, bbox)) {
+          newPoints.push(currentFeature);
+        }
+      })
+      const newGraph = featureCollection(newPoints);
+      return (coords) => nearestPoint(point(coords), newGraph);
+    } catch (err) {
+      console.error(err);
+      return nearestPointInNetwork;
+    }
+  }
 
-  return {pathFinder, nearestPointInNetwork};
+  return {pathFinder, nearestPointInNetwork, getFilteredNetwork};
 }
 
 module.exports = getPathFinder;
